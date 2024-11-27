@@ -26,7 +26,7 @@ It's like giving your LLM a map instead of exploring a maze.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/CntxtPY.git
+git clone https://github.com/brandondocusen/CntxtPY.git
 
 # Navigate to the directory
 cd CntxtPY
