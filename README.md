@@ -98,7 +98,7 @@ Just fork, make your changes, and submit a PR. Check out our [contribution guide
 
 ## 🎯 Future Goals
 
-- [ ] Deeper support for additional frameworks (FastAPI, Django, Flask)
+- [ ] Deeper support for additional frameworks
 - [ ] Enhanced type hint processing
 - [ ] Interactive web-based visualizations
 - [ ] Custom graph export formats
