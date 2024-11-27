@@ -3,7 +3,18 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-> 🤯 **75% Token Reduction In Context Window Usage!** Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
+> 🤯 **75% Token Reduction In Context Window Usage!**
+
+## Why CntxtPY?
+
+-  Powers LLM understanding of Pythonic code structures
+-  Maps decorators, generators, and comprehensions
+-  Extracts modules, packages and type hints
+-  Captures Python's dynamic patterns and imports
+-  Optimizes LLM context for Python's flexibility
+
+
+Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
 
 It's like handing your LLM the cliff notes instead of a novel.
 
