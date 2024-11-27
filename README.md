@@ -7,12 +7,13 @@
 
 ## Why CntxtPY?
 
--  Powers LLM understanding of Pythonic code structures
--  Maps decorators, generators, and comprehensions
--  Extracts modules, packages and type hints
--  Captures Python's dynamic patterns and imports
--  Optimizes LLM context for Python's flexibility
-
+-  Boosts precision: Maps relationships and dependencies for clear analysis.
+-  Eliminates noise: Focuses LLMs on key code insights.
+-  Supports analysis: Reveals architecture for smarter LLM insights.
+-  Improves recommendations: Gives LLMs detailed metadata for better suggestions.
+-  Speeds solutions: Helps LLMs trace workflows and logic faster.
+-  Optimized prompts: Provides structured context for better LLM responses.
+-  Streamlines collaboration: Helps LLMs explain and document code easily.
 
 Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
 
