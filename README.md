@@ -5,7 +5,7 @@
 
 > 🤯 **75% Token Reduction In Context Window Usage!** Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
 
-It's like giving your LLM a map instead of exploring a maze.
+It's like handing your LLM the cliff notes instead of a novel.
 
 ## ✨ Features
 
