@@ -3,7 +3,7 @@
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-> 🤯 **80% Token Reduction In Context Window Usage!** Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
+> 🤯 **75% Token Reduction In Context Window Usage!** Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
 
 It's like giving your LLM a map instead of exploring a maze.
 
