@@ -19,11 +19,9 @@ Supercharge your LLM's understanding of Python codebases. CntxtPY generates comp
 
 It's like handing your LLM the cliff notes instead of a novel.
 
-## 🚀 **Active Development Notice**
+## **Active Development Notice**
 
-- CntxtPY is under **active development at high velocity** as we continuously improve the project.
-  
-Thank you for your support and contributions! 🙌
+- CntxtPY is under **active development at high velocity** as we continuously improve the project. Thank you for your contributions! 🙌
 
 ## ✨ Features
 
