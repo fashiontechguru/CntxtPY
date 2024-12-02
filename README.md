@@ -21,7 +21,8 @@ It's like handing your LLM the cliff notes instead of a novel.
 
 🚀 **Active Development Notice**
 
-- Cntxt is under **active development** at high velocity as we continuously improve the project.
+- CntxtPY is under **active development at high velocity** as we continuously improve the project.
+  
 Thank you for your support and contributions! 🙌
 
 ## ✨ Features
