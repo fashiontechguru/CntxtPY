@@ -15,7 +15,7 @@
 -  Optimized prompts: Provides structured context for better LLM responses.
 -  Streamlines collaboration: Helps LLMs explain and document code easily.
 
-Supercharge your LLM's understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
+Supercharge your understanding of Python codebases. CntxtPY generates comprehensive knowledge graphs that help LLMs navigate and comprehend your code structure with minimal token usage.
 
 It's like handing your LLM the cliff notes instead of a novel.
 
