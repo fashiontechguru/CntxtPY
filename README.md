@@ -45,7 +45,7 @@ It's like handing your LLM the cliff notes instead of a novel.
 git clone https://github.com/brandondocusen/CntxtPY.git
 
 # Navigate to the directory
-cd CntxtPY
+cd CntxtPY-main
 
 # Install required packages
 pip install networkx matplotlib typing-extensions
