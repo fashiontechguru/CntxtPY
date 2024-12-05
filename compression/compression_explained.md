@@ -188,5 +188,5 @@ This script compresses a JSON-based knowledge graph while maintaining data integ
 
 **Author**: Brandon Docusen  
 **License**: MIT  
-**Contact**: [brandondocusen@gmail.com]
+**Contact**: brandondocusen@gmail.com
 ```
