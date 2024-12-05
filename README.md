@@ -52,6 +52,9 @@ pip install pyyaml configparser toml chardet networkx
 
 # Run the analyzer
 python cntxtpy.py
+
+# Find your compressed codebase within the compressed_knowledge_graph.txt file
+cd compression
 ```
 
 When prompted, enter the path to your Python codebase. The tool will generate a `python_code_knowledge_graph.json` file and offer to visualize the relationships.
@@ -90,9 +93,10 @@ Using the knowledge graph's type hint analysis, explain how the application hand
 
 ## 📊 Output Format
 
-The tool generates two main outputs:
+The tool generates three main outputs:
 1. A JSON knowledge graph (`python_code_knowledge_graph.json`)
-2. Optional visualization using matplotlib
+2. A highly compressed txt knowledge graph ('compressed_knowledge_graph.txt')
+3. Optional visualization using matplotlib
 
 The knowledge graph includes:
 - Detailed metadata about your codebase
