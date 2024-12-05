@@ -53,7 +53,7 @@ pip install pyyaml configparser toml chardet networkx
 # Run the analyzer
 python cntxtpy.py
 
-# compressed_knowledge_graph.txt in the compression directory.
+# find compressed_knowledge_graph.txt in the compression directory.
 cd compression
 
 # upload compressed_knowledge_graph.txt to an LLM and discuss your codebase!
