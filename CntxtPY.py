@@ -855,13 +855,13 @@ if __name__ == "__main__":
         if not os.path.exists(codebase_dir):
             raise ValueError(f"Directory does not exist: {codebase_dir}")
 
-        output_file = "python_code_knowledge_graph.json"
+        # Construct the output path to include the compression directory
+        output_file = os.path.join("compression", "python_code_knowledge_graph.json") 
 
         # Create and analyze the codebase
         graph_generator = PythonCodeKnowledgeGraph(directory=codebase_dir)
         graph_generator.analyze_codebase()
 
-        # Save the graph
         graph_generator.save_graph(output_file)
 
         # Optional visualization
@@ -881,3 +881,21 @@ if __name__ == "__main__":
         logging.error(f"Error: {str(e)}")
     finally:
         print("\nDone.")
+
+        # Call the compression script
+        try:
+            import subprocess
+
+            compression_script = os.path.join('compression', 'compression.py')  
+            
+            # Use absolute path for the output file
+            output_file_path = os.path.join(codebase_dir, 'compression', output_file)
+
+            subprocess.run(['python', compression_script, output_file_path], check=True)
+            print(f"Compression script executed successfully on {output_file_path}")
+        except FileNotFoundError:
+            print(f"Error: Compression script not found at {compression_script}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error executing compression script: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
