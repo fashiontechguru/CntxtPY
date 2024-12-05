@@ -1,9 +1,19 @@
+import sys
 import json
-from collections import defaultdict
 import os
+from collections import defaultdict
+
+# Ensure a file path is provided
+if len(sys.argv) != 2:
+    raise ValueError("Please provide the path to 'python_code_knowledge_graph.json' as an argument.")
+
+input_file = sys.argv[1]
 
 # Load the knowledge graph from the JSON file
-with open("python_code_knowledge_graph.json", "r") as f:
+if not os.path.exists(input_file):
+    raise FileNotFoundError(f"File not found: {input_file}")
+
+with open(input_file, "r") as f:
     knowledge_graph = json.load(f)
 
 # Function to generate abbreviations for all unique terms
