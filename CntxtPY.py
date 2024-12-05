@@ -855,8 +855,12 @@ if __name__ == "__main__":
         if not os.path.exists(codebase_dir):
             raise ValueError(f"Directory does not exist: {codebase_dir}")
 
+        # Create compression directory if it doesn't exist
+        compression_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "compression")
+        os.makedirs(compression_dir, exist_ok=True)
+        
         # Construct the output path to include the compression directory
-        output_file = os.path.join("compression", "python_code_knowledge_graph.json") 
+        output_file = os.path.join(compression_dir, "python_code_knowledge_graph.json")
 
         # Create and analyze the codebase
         graph_generator = PythonCodeKnowledgeGraph(directory=codebase_dir)
@@ -864,32 +868,23 @@ if __name__ == "__main__":
 
         graph_generator.save_graph(output_file)
 
-        # Optional visualization
-        while True:
-            visualize = input("\nWould you like to visualize the graph? (yes/no): ").strip().lower()
-            if visualize in ["yes", "no"]:
+        # Wait until the file is confirmed to exist
+        import time
+        for _ in range(10):  # Retry for up to 10 seconds
+            if os.path.exists(output_file):
                 break
-            print("Invalid choice. Please enter yes or no.")
-
-        if visualize == "yes":
-            print("\nGenerating visualization...")
-            graph_generator.visualize_graph()
-
-    except KeyboardInterrupt:
-        print("\nOperation cancelled by user.")
-    except Exception as e:
-        logging.error(f"Error: {str(e)}")
-    finally:
-        print("\nDone.")
+            time.sleep(1)
+        else:
+            raise FileNotFoundError(f"{output_file} was not created in time.")
 
         # Call the compression script
         try:
             import subprocess
 
-            compression_script = os.path.join('compression', 'compression.py')  
-            
-            # Use absolute path for the output file
-            output_file_path = os.path.join(codebase_dir, 'compression', output_file)
+            compression_script = os.path.join(compression_dir, 'compression.py')  
+
+            # Output file path is already absolute from earlier change
+            output_file_path = output_file
 
             subprocess.run(['python', compression_script, output_file_path], check=True)
             print(f"Compression script executed successfully on {output_file_path}")
@@ -899,3 +894,10 @@ if __name__ == "__main__":
             print(f"Error executing compression script: {e}")
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+    finally:
+        print("\nDone.")
