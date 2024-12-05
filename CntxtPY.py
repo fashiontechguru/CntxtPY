@@ -877,6 +877,12 @@ if __name__ == "__main__":
         else:
             raise FileNotFoundError(f"{output_file} was not created in time.")
 
+        # Ask user if they want to visualize the graph
+        visualize = input("\nWould you like to visualize the knowledge graph? (y/n): ").strip().lower()
+        if visualize == 'y':
+            print("Generating visualization...")
+            graph_generator.visualize_graph()
+
         # Call the compression script
         try:
             import subprocess
