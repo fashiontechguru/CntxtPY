@@ -97,7 +97,7 @@ Using the knowledge graph's type hint analysis, explain how the application hand
 
 The tool generates three main outputs:
 1. A JSON knowledge graph (`python_code_knowledge_graph.json`)
-2. A highly compressed txt knowledge graph ('compressed_knowledge_graph.txt')
+2. A highly compressed txt knowledge graph (`compressed_knowledge_graph.txt`)
 3. Optional visualization using matplotlib
 
 The knowledge graph includes:
