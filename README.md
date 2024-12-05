@@ -53,7 +53,7 @@ pip install pyyaml configparser toml chardet networkx
 # Run the analyzer
 python cntxtpy.py
 
-# Find your compressed codebase within the compressed_knowledge_graph.txt file
+# The key relational data of your codebase is now in the compressed_knowledge_graph.txt file. Go ahead a feed it to an LLM!
 cd compression
 ```
 
