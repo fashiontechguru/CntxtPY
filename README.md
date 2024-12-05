@@ -53,10 +53,10 @@ pip install pyyaml configparser toml chardet networkx
 # Run the analyzer
 python cntxtpy.py
 
-# Find compressed_knowledge_graph.txt in the compression directory.
+# Find compressed_knowledge_graph.txt in the compression directory
 cd compression
 
-# Upload compressed_knowledge_graph.txt to an LLM and discuss your codebase!
+# Upload compressed_knowledge_graph.txt to an LLM and discuss your codebase
 ```
 
 When prompted, enter the path to your Python codebase. The tool will generate a `python_code_knowledge_graph.json` file and offer to visualize the relationships.
