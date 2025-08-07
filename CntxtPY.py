@@ -309,29 +309,54 @@ class PythonCodeKnowledgeGraph:
         logging.debug(f"Edge added: {file_node} -> {class_node} with relation DEFINES")
 
     def _add_method_node(self, class_name: str, method_info: FunctionInfo):
-        """Add a method node to the graph."""
+        """
+        Add a method node to the graph.
+
+        Improvements:
+        - Ensures parameters and decorators are JSON-serializable.
+        - Coerces sets to lists and converts enums or unknown objects to strings.
+        - Handles default_value fallback if unserializable.
+        """
+
         method_name = method_info.name
         method_node = f"Method: {method_name}"
 
         if not self.graph.has_node(method_node):
-            # Convert parameters to a serializable format
-            parameters = [
-                {
-                    'name': param.name,
-                    'type': param.type_hint,
-                    'default': param.default_value
-                }
-                for param in method_info.parameters
-            ]
+            # Safely convert parameters
+            parameters = []
+            for param in method_info.parameters:
+                try:
+                    default_val = param.default_value
+                    json.dumps(default_val)  # Will raise if unserializable
+                except Exception:
+                    default_val = str(default_val)
+
+                parameters.append({
+                    'name': str(param.name),
+                    'type': str(param.type_hint),
+                    'default': default_val
+                })
+
+            # Safely convert decorators
+            decorators_raw = method_info.decorators
+            if isinstance(decorators_raw, (set, tuple)):
+                decorators_raw = list(decorators_raw)
+
+            decorators_clean = []
+            for dec in decorators_raw:
+                try:
+                    decorators_clean.append(str(dec.value) if hasattr(dec, "value") else str(dec))
+                except Exception:
+                    decorators_clean.append(str(dec))
 
             self.graph.add_node(
                 method_node,
                 type="method",
                 name=method_name,
                 id=method_node,
-                return_type=method_info.return_type,
+                return_type=str(method_info.return_type),
                 parameters=parameters,
-                decorators=method_info.decorators
+                decorators=decorators_clean
             )
             self.stats['total_functions'] += 1
             logging.debug(f"Method node added: {method_node}, Total functions: {self.stats['total_functions']}")
@@ -344,32 +369,59 @@ class PythonCodeKnowledgeGraph:
             self.graph.add_edge(class_node, method_node, relation="HAS_METHOD")
             logging.debug(f"Edge added: {class_node} -> {method_node} with relation HAS_METHOD")
         else:
-            logging.warning(f"Class node {class_node} does not exist; cannot add method {method_info.name}")
+            logging.warning(f"Class node {class_node} does not exist; cannot add method {method_name}")
 
     def _add_function_node(self, file_node: str, function_info: FunctionInfo):
-        """Add a function node to the graph."""
+        """
+        Add a function node to the graph.
+
+        Improvements:
+        - Ensures parameters and decorators are JSON-serializable.
+        - Coerces sets to lists and converts enums or unknown objects to strings.
+        - Handles default_value fallback if unserializable.
+        """
+
         function_name = function_info.name
         function_node = f"Function: {function_name}"
 
         if not self.graph.has_node(function_node):
-            # Convert parameters to a serializable format
-            parameters = [
-                {
-                    'name': param.name,
-                    'type': param.type_hint,
-                    'default': param.default_value
-                }
-                for param in function_info.parameters
-            ]
+            # Safely convert parameters to serializable format
+            parameters = []
+            for param in function_info.parameters:
+                try:
+                    default_val = param.default_value
+                    # Ensure default_value is serializable
+                    json.dumps(default_val)  # Will raise TypeError if not serializable
+                except Exception:
+                    default_val = str(default_val)  # Fallback to string
 
+                parameters.append({
+                    'name': str(param.name),
+                    'type': str(param.type_hint),
+                    'default': default_val
+                })
+
+            # Safely convert decorators (set, enum, etc → list of strings)
+            decorators_raw = function_info.decorators
+            if isinstance(decorators_raw, (set, tuple)):
+                decorators_raw = list(decorators_raw)
+
+            decorators_clean = []
+            for dec in decorators_raw:
+                try:
+                    decorators_clean.append(str(dec.value) if hasattr(dec, "value") else str(dec))
+                except Exception:
+                    decorators_clean.append(str(dec))  # Defensive fallback
+
+            # Add the sanitized function node
             self.graph.add_node(
                 function_node,
                 type="function",
                 name=function_name,
                 id=function_node,
-                return_type=function_info.return_type,
+                return_type=str(function_info.return_type),
                 parameters=parameters,
-                decorators=function_info.decorators
+                decorators=decorators_clean
             )
             self.stats['total_functions'] += 1
             logging.debug(f"Function node added: {function_node}, Total functions: {self.stats['total_functions']}")
@@ -381,9 +433,33 @@ class PythonCodeKnowledgeGraph:
         logging.debug(f"Edge added: {file_node} -> {function_node} with relation DEFINES")
 
     def _add_variable_node(self, file_node: str, variable_info: Dict[str, Any]):
-        """Add a variable node to the graph."""
-        variable_name = variable_info['name']
+        """
+        Add a variable node to the graph.
+
+        Enhancements:
+        - Safely coerces variable 'value' and 'type_hint' to serializable strings.
+        - Guards against malformed or unexpected input types.
+        - Logs meaningful debug info and avoids crashes on invalid types.
+        """
+        import json
+
+        variable_name = variable_info.get('name', '<unnamed>')
         variable_node = f"Variable: {variable_name}"
+
+        # Coerce type_hint to string if needed
+        raw_type = variable_info.get('type_hint', None)
+        try:
+            type_hint = str(raw_type)
+        except Exception:
+            type_hint = "<unreadable_type_hint>"
+
+        # Coerce value to JSON-safe string or fallback
+        raw_value = variable_info.get('value', None)
+        try:
+            json.dumps(raw_value)
+            value = raw_value
+        except Exception:
+            value = str(raw_value) if raw_value is not None else None
 
         if not self.graph.has_node(variable_node):
             self.graph.add_node(
@@ -391,8 +467,8 @@ class PythonCodeKnowledgeGraph:
                 type="variable",
                 name=variable_name,
                 id=variable_node,
-                value=variable_info.get('value', None),
-                type_hint=variable_info.get('type_hint', None)
+                value=value,
+                type_hint=type_hint
             )
             self.stats['total_variables'] += 1
             logging.debug(f"Variable node added: {variable_node}, Total variables: {self.stats['total_variables']}")
@@ -403,14 +479,41 @@ class PythonCodeKnowledgeGraph:
         self.graph.add_edge(file_node, variable_node, relation="HAS_VARIABLE")
         logging.debug(f"Edge added: {file_node} -> {variable_node} with relation HAS_VARIABLE")
 
-    def _add_annotation_node(self, file_node: str, annotation: str):
-        """Add an annotation (decorator) node to the graph."""
-        annotation_node = f"Decorator: {annotation}"
+    def _add_annotation_node(self, file_node: str, annotation: Any):
+        """
+        Add an annotation (decorator) node to the graph.
+
+        Enhancements:
+        - Safely coerces decorator names to strings.
+        - Handles AST nodes or malformed inputs.
+        - Tracks unique decorators using a set.
+        """
+        # Fallback and type-safe conversion
+        if annotation is None:
+            annotation_str = "<None>"
+        elif isinstance(annotation, str):
+            annotation_str = annotation
+        else:
+            try:
+                annotation_str = str(annotation)
+            except Exception:
+                annotation_str = "<unreadable_annotation>"
+
+        annotation_node = f"Decorator: {annotation_str}"
 
         if not self.graph.has_node(annotation_node):
-            self.graph.add_node(annotation_node, type="decorator", name=annotation, id=annotation_node)
-            if annotation not in self.stats['total_annotations']:
-                self.stats['total_annotations'].add(annotation)
+            self.graph.add_node(
+                annotation_node,
+                type="decorator",
+                name=annotation_str,
+                id=annotation_node
+            )
+            # Ensure stats field is initialized as a set
+            if 'total_annotations' not in self.stats or not isinstance(self.stats['total_annotations'], set):
+                self.stats['total_annotations'] = set()
+
+            if annotation_str not in self.stats['total_annotations']:
+                self.stats['total_annotations'].add(annotation_str)
                 logging.debug(f"Decorator node added: {annotation_node}, Total unique decorators: {len(self.stats['total_annotations'])}")
         else:
             logging.debug(f"Decorator node already exists: {annotation_node}")
@@ -418,68 +521,178 @@ class PythonCodeKnowledgeGraph:
         self.graph.add_edge(file_node, annotation_node, relation="DECORATED_WITH")
         logging.debug(f"Edge added: {file_node} -> {annotation_node} with relation DECORATED_WITH")
 
-    def _add_comment_node(self, file_node: str, comment: CommentInfo):
-        """Add a comment node to the graph."""
-        comment_id = f"Comment: {comment.line_number}_{hash(comment.content)}"
-        comment_node = comment_id
-        if not self.graph.has_node(comment_node):
-            self.graph.add_node(
-                comment_node,
-                type="comment",
-                comment_type=comment.type.value,
-                content=comment.content,
-                line_number=comment.line_number,
-                associated_element=comment.associated_element,
-                tags=comment.tags or [],
-                id=comment_node
-            )
-            self.stats['total_comments'] += 1
-        self.graph.add_edge(file_node, comment_node, relation="HAS_COMMENT")
+    def _add_comment_node(self, file_node: str, comment: Any):
+        """
+        Safely adds a comment node to the graph.
 
-    def _add_log_statement_node(self, file_node: str, log_info: Dict[str, Any]):
-        """Add a log statement node to the graph."""
-        log_id = f"Log: {hash(log_info.get('message', ''))}"
-        log_node = log_id
-        if not self.graph.has_node(log_node):
-            self.graph.add_node(
-                log_node,
-                type="log_statement",
-                level=log_info.get('level', 'INFO'),
-                message=log_info.get('message', ''),
-                id=log_node
-            )
-            self.stats['total_logging_statements'] += 1
-        self.graph.add_edge(file_node, log_node, relation="USES")
+        Defensive upgrades:
+        - Coerces all fields with fallbacks.
+        - Ensures stats field is valid.
+        - Logs and skips corrupt comment objects.
+        """
+        try:
+            # Coerce fields safely
+            line_number = getattr(comment, 'line_number', -1)
+            content = getattr(comment, 'content', '<no content>')
+            comment_type = getattr(getattr(comment, 'type', None), 'value', 'unknown')
+            associated_element = getattr(comment, 'associated_element', None)
+            tags = getattr(comment, 'tags', []) or []
 
-    def _add_integration_node(self, file_node: str, integration: Dict[str, Any]):
-        """Add an integration node to the graph."""
-        integration_name = integration.get('name', 'unnamed_integration')
-        integration_node = f"Integration: {integration_name}"
-        if not self.graph.has_node(integration_node):
-            self.graph.add_node(
-                integration_node,
-                type="api_integration",
-                name=integration_name,
-                url=integration.get('url', ''),
-                id=integration_node
-            )
-            self.stats['total_integrations'] += 1
-        self.graph.add_edge(file_node, integration_node, relation="INTEGRATES_WITH")
+            try:
+                comment_hash = hash(content)
+            except Exception:
+                comment_hash = hash("<bad content>")
 
-    def _add_version_info(self, file_node: str, version_info: Dict[str, Any]):
-        """Add version information to the graph."""
-        for version_type, version_data in version_info.items():
-            version_node = f"Version: {version_type}"
-            if not self.graph.has_node(version_node):
+            comment_id = f"Comment: {line_number}_{comment_hash}"
+            comment_node = comment_id
+
+            if not self.graph.has_node(comment_node):
                 self.graph.add_node(
-                    version_node,
-                    type="version",
-                    version_type=version_type,
-                    constraints=version_data.get('constraints', ''),
-                    id=version_node
+                    comment_node,
+                    type="comment",
+                    comment_type=comment_type,
+                    content=content,
+                    line_number=line_number,
+                    associated_element=associated_element,
+                    tags=tags,
+                    id=comment_node
                 )
-                self.stats['total_version_constraints'] += 1
-            self.graph.add_edge(file_node, version_node, relation="HAS_VERSION")
+                if 'total_comments' not in self.stats or not isinstance(self.stats['total_comments'], int):
+                    self.stats['total_comments'] = 0
+                self.stats['total_comments'] += 1
+                logging.debug(f"Comment node added: {comment_node} (line {line_number})")
+
+            self.graph.add_edge(file_node, comment_node, relation="HAS_COMMENT")
+            logging.debug(f"Edge added: {file_node} -> {comment_node} with relation HAS_COMMENT")
+
+        except Exception as e:
+            logging.warning(f"Failed to add comment node: {e}")
+
+    def _add_log_statement_node(self, file_node: str, log_info: Any):
+        """
+        Safely adds a log statement node to the graph.
+        
+        Defensive upgrades:
+        - Coerces input safely.
+        - Ensures ID is hashable.
+        - Logs malformed entries.
+        """
+        try:
+            if isinstance(log_info, str):
+                log_message = log_info
+                log_level = "INFO"
+            elif isinstance(log_info, dict):
+                log_message = log_info.get('message', '')
+                log_level = log_info.get('level', 'INFO')
+            else:
+                log_message = str(log_info)
+                log_level = "INFO"
+
+            try:
+                log_hash = hash(log_message)
+            except Exception:
+                log_hash = hash("<bad message>")
+
+            log_id = f"Log: {log_hash}"
+            log_node = log_id
+
+            if not self.graph.has_node(log_node):
+                self.graph.add_node(
+                    log_node,
+                    type="log_statement",
+                    level=log_level,
+                    message=log_message,
+                    id=log_node
+                )
+                if 'total_logging_statements' not in self.stats or not isinstance(self.stats['total_logging_statements'], int):
+                    self.stats['total_logging_statements'] = 0
+                self.stats['total_logging_statements'] += 1
+                logging.debug(f"Log node added: {log_node}")
+
+            self.graph.add_edge(file_node, log_node, relation="USES")
+            logging.debug(f"Edge added: {file_node} -> {log_node} with relation USES")
+
+        except Exception as e:
+            logging.warning(f"Failed to add log statement node: {e}")
+
+    def _add_integration_node(self, file_node: str, integration: Any):
+        """
+        Safely adds an integration node to the graph.
+        
+        Accepts both dicts and fallback strings. Adds defensive logging for malformed entries.
+        """
+        try:
+            if isinstance(integration, dict):
+                integration_name = integration.get('name', 'unnamed_integration')
+                integration_url = integration.get('url', '')
+            elif isinstance(integration, str):
+                integration_name = integration
+                integration_url = ''
+            else:
+                integration_name = str(integration)
+                integration_url = ''
+
+            integration_node = f"Integration: {integration_name}"
+
+            if not self.graph.has_node(integration_node):
+                self.graph.add_node(
+                    integration_node,
+                    type="api_integration",
+                    name=integration_name,
+                    url=integration_url,
+                    id=integration_node
+                )
+                if 'total_integrations' not in self.stats or not isinstance(self.stats['total_integrations'], int):
+                    self.stats['total_integrations'] = 0
+                self.stats['total_integrations'] += 1
+                logging.debug(f"Integration node added: {integration_node}")
+
+            self.graph.add_edge(file_node, integration_node, relation="INTEGRATES_WITH")
+            logging.debug(f"Edge added: {file_node} -> {integration_node} with relation INTEGRATES_WITH")
+
+        except Exception as e:
+            logging.warning(f"Failed to add integration node: {e}")
+
+    def _add_version_info(self, file_node: str, version_info: Any):
+        """
+        Add version information nodes to the graph from various formats.
+        Handles malformed or inconsistent data gracefully.
+        """
+        try:
+            if not isinstance(version_info, dict):
+                logging.warning(f"Version info for {file_node} is not a dict: {version_info}")
+                return
+
+            for version_type, version_data in version_info.items():
+                version_node = f"Version: {version_type}"
+
+                # Defensive default if version_data isn't a dict
+                constraints = ""
+                if isinstance(version_data, dict):
+                    constraints = version_data.get('constraints', '')
+                elif isinstance(version_data, str):
+                    constraints = version_data
+                elif version_data is not None:
+                    constraints = str(version_data)
+
+                if not self.graph.has_node(version_node):
+                    self.graph.add_node(
+                        version_node,
+                        type="version",
+                        version_type=version_type,
+                        constraints=constraints,
+                        id=version_node
+                    )
+                    if 'total_version_constraints' not in self.stats or not isinstance(self.stats['total_version_constraints'], int):
+                        self.stats['total_version_constraints'] = 0
+                    self.stats['total_version_constraints'] += 1
+                    logging.debug(f"Version node added: {version_node}")
+
+                self.graph.add_edge(file_node, version_node, relation="HAS_VERSION")
+                logging.debug(f"Edge added: {file_node} -> {version_node} with relation HAS_VERSION")
+
+        except Exception as e:
+            logging.warning(f"Failed to add version info for {file_node}: {e}")
 
     def _add_localization_usage_node(self, file_node: str, localization: Dict[str, Any]):
         """Add a localization usage node to the graph."""
